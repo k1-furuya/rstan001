@@ -1,0 +1,56 @@
+library(rstan)
+library(ggplot2)
+library(brms)
+rstan_options(auto_write = TRUE)
+library(ggfortify)
+library(bayesplot)
+library(gridExtra)
+options(mc.cores = parallel::detectCores())
+library(GGally)
+library(dplyr)
+
+
+#データの読み込み
+atnd3 <- read.csv("data-attendance-2.txt")
+head(atnd3)
+
+
+#二値変数Aをfactor型に、Scoreを200で割ってスケーリング
+atnd3$A <- as.factor(atnd3$A)
+atnd3 <- atnd3 %>% mutate(Scaled_Score = Score / 200)
+
+
+#ポアソン回帰モデルを作る
+atnd3_brms <- brm(
+  formula = M ~ A + Scaled_Score,
+  family = poisson(),
+  data = atnd3,
+  seed = 1,
+  prior = c(set_prior("", class = "Intercept"))
+)
+
+
+#MCMCの結果の確認
+atnd3_brms
+
+
+#回帰曲線の図示
+eff <- conditional_effects(atnd3_brms,
+                           effects="Scaled_Score:A")
+plot(eff, points=TRUE)
+
+
+#事後分布とトレースプロットの表示
+plot(atnd3_brms)
+
+
+#事後予測チェック  ##うまく収束しなかった
+brms::pp_check(atnd3_brms)
+
+
+#95%予測区間付きのグラフ
+set.seed(1)
+eff_pred <- conditional_effects(atnd3_brms,
+                                method = "predict",
+                                effects = "Scaled_Score:A")
+plot(eff_pred,points=TRUE)
