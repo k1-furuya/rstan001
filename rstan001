@@ -1,0 +1,67 @@
+#(毎回コピペなので使用していないものもあり）
+library(rstan)
+library(ggplot2)
+library(brms)
+rstan_options(auto_write = TRUE)
+library(ggfortify)
+library(bayesplot)
+library(gridExtra)
+library(dplyr)
+library(GGally)
+options(mc.cores = parallel::detectCores())
+
+
+#データの読み込み
+atnd <- read.csv("data-attendance-1.txt")
+head(atnd)
+summary(atnd)
+
+
+#Score、AとYの関係を散布図で表示
+ggplot(data=atnd,
+       mapping=aes(x=Score, y= Y))+
+  geom_point(aes(color= A))
+
+
+#散布図行列も表示
+ggpairs(atnd, 
+        mapping = aes(color = as.factor(A), shape = as.factor(A)),
+        lower = list(continuous = "points", combo = "facetdensity"),
+        upper = "blank",
+        diag = list(continuous = "barDiag", combo = "barDiag")
+)
+
+
+#Scoreを200で割ってスケーリングしておく
+atnd <- atnd %>% mutate(Scaled_Score = Score / 200)
+
+
+#二値変数のAをfactor型に変換
+atnd$A <- as.factor(atnd$A)
+
+
+#brmsでモデルの推定
+atnd_brms <- brm(
+  formula = Y ~ A + Scaled_Score,  
+  family = gaussian(),
+  data = atnd,
+  seed = 1,
+  prior = c(set_prior("", class = "Intercept"),
+            set_prior("", class = "sigma"))
+)
+
+#MCMCの結果の表示
+atnd_brms
+
+
+#事後分布とトレースプロットを表示
+plot(atnd_brms)
+
+
+#回帰直線の図示
+eff <- conditional_effects(atnd_brms,effects="Scaled_Score:A")
+plot(eff,points=TRUE)
+
+#事後予測チェック
+brms::pp_check(atnd_brms)
+
