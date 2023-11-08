@@ -1,0 +1,50 @@
+library(rstan)
+library(ggplot2)
+library(brms)
+rstan_options(auto_write = TRUE)
+library(ggfortify)
+library(bayesplot)
+library(gridExtra)
+options(mc.cores = parallel::detectCores())
+library(GGally)
+library(dplyr)
+
+
+#データの読み込み
+salary2 <- read.csv("data-salary-2.txt")
+head(salary2)
+summary(salary2)
+
+
+#brmsでモデルの推定 #controlのところはよく分かってない
+salary2_brms <- brm(
+  formula = Y ~ X + (X||KID),
+  family = gaussian(),
+  data = salary2,
+  seed = 1,
+  iter = 6000,
+  warmup = 5000,
+  control = list(adapt_delta=0.97, max_treedepth=15)
+)
+
+
+#MCMCの結果の表示
+salary2_brms
+
+
+#グループ別の回帰直線を図示
+conditions <- data.frame(
+  KID = c(1,2,3,4))
+eff_2 <- conditional_effects(salary2_brms,
+                             re_formula = NULL,
+                             effects="X",
+                             conditions=conditions)
+plot(eff_2, points=TRUE)
+
+
+#事後分布とトレースプロットを表示
+plot(salary2_brms)
+
+
+#事後予測チェック
+brms::pp_check(salary2_brms)
