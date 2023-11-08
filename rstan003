@@ -9,7 +9,7 @@ options(mc.cores = parallel::detectCores())
 library(GGally)
 library(dplyr)
 　
-
+　
 #データの読み込み
 salary2 <- read.csv("data-salary-2.txt")
 head(salary2)
