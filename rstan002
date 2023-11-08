@@ -9,7 +9,7 @@ options(mc.cores = parallel::detectCores())
 library(GGally)
 library(dplyr)
 
-
+　
 #データの読み込み
 atnd3 <- read.csv("data-attendance-2.txt")
 head(atnd3)
