@@ -1,4 +1,4 @@
-
+ 
 install.packages("rstan")
 library(rstan)
 rstan_options(auto_write = TRUE)
