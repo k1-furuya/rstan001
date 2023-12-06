@@ -1,0 +1,66 @@
+
+install.packages("rstan")
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+
+# Set random seed for reproducibility
+set.seed(123)
+
+# True probabilities for sites A and B
+true_p_A <- 0.05
+true_p_B <- 0.04
+
+# Sample sizes for sites A and B
+N_A <- 1500
+N_B <- 750
+
+# Generate observations for sites A and B
+observations_A <- rbinom(N_A, 1, true_p_A)
+observations_B <- rbinom(N_B, 1, true_p_B)
+
+# Combine data for Stan analysis
+data_stan <- list(
+  N_A = N_A,
+  occurrences_A = observations_A,
+  N_B = N_B,
+  occurrences_B = observations_B
+)
+
+# stan code
+
+  data {
+    int<lower=0> N_A;
+    int<lower=0, upper=1> occurrences_A[N_A];
+    int<lower=0> N_B;
+    int<lower=0, upper=1> occurrences_B[N_B];
+  }
+  parameters {
+    real<lower=0, upper=1> p_A;
+    real<lower=0, upper=1> p_B;
+  }
+  model {
+    p_A ~ uniform(0, 1);
+    p_B ~ uniform(0, 1);
+
+    occurrences_A ~ bernoulli(p_A);
+    occurrences_B ~ bernoulli(p_B);
+  }
+  generated quantities {
+    real delta;
+    delta = p_A - p_B;
+  }
+
+
+
+
+# Compile the Stan model
+mcmc_reesult <- stan(
+  file="stan_model.stan",
+  data = data_stan,
+  seed = 1
+)
+
+mcmc_sample <- rstan::extract(mcmc_reesult,permuted=FALSE)
+mcmc_dens(mcmc_sample, pars="delta")
