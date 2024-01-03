@@ -1,3 +1,5 @@
+### 適切なモデリングでなかった為、これは間違いの備忘録として残す。修正したものは別にアップロードしている。
+
 library(rstan)
 library(ggplot2)
 library(brms)
@@ -15,6 +17,8 @@ salary2 <- read.csv("data-salary-2.txt")
 head(salary2)
 summary(salary2)
 
+
+###モデル式が切片の会社差を表していなかった為、不適切だったと判断
 
 #brmsでモデルの推定 #controlのところはよく分かってない
 salary2_brms <- brm(
