@@ -1,0 +1,37 @@
+library(rstan)
+library(brms)
+rstan_options(auto_write = TRUE)
+library(ggfortify)
+library(brms)
+library(bayesplot)
+library(gridExtra)
+options(mc.cores = parallel::detectCores())
+
+#データの読み込み
+df <- read.csv("data-salary-2.txt")
+head(df,n=3)
+
+# brmsの式でモデルを定義 
+model <- brm(
+  Y ~ 0 + Intercept + X + (0 + Intercept + X | KID),
+  data = df,
+  family = gaussian(),
+  chains = 4,
+  cores = 4
+)
+plot(model)
+
+#パラメータの表示
+summary(model)
+
+# 会社ごとにグラフを分けて回帰曲線を描く
+conditions <- data.frame(
+  KID = c("1","2","3","4")
+)
+
+eff <- conditional_effects(
+  model,
+  re_formula=NULL,
+  conditions=conditions
+)
+plot(eff,points=TRUE)
