@@ -12,3 +12,5 @@ pymcをrstanで書いたものも追加\
  Pythonで体験するベイズ推論\
  Pythonでスラスラわかるベイズ推論\
  効果検証入門
+ Pythonによる時系列予測
+ Pythonによる時系列分析
