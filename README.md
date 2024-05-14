@@ -13,4 +13,4 @@ pymcをrstanで書いたものも追加\
  Pythonでスラスラわかるベイズ推論\
  効果検証入門\
  Pythonによる時系列予測\
- Pythonによる時系列分析\
+ Pythonによる時系列分析
