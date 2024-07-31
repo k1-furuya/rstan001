@@ -1,2 +1,2 @@
-matploylib
+matplotlib
 scikit-learn
